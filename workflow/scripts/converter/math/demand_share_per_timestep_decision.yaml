@@ -1,0 +1,32 @@
+# Legacy Calliope v0.6 `demand_share_per_timestep_decision` group constraint.
+#
+# Adapted from the Calliope math gallery (demand_share_per_timestep_decision.yaml).
+# Unlike the gallery, the decision variable is indexed over carriers (as the
+# legacy `loc_tech_carrier` variable was), so legacy custom math referring to it
+# (e.g. run.py `storage_ev_constraint`) maps one-to-one.
+# The per-group constraints are generated in `group_constraints.yaml`.
+
+parameters:
+  demand_share_relaxation:
+    description: >-
+      Legacy `run.relax_constraint.demand_share_per_timestep_decision_main_constraint`.
+      0 == no relaxation, 0.01 == 1% relaxation.
+    default: 0
+    unit: unitless
+
+lookups:
+  demand_share_per_timestep_decision_member:
+    description: Technologies at nodes producing a carrier whose demand share is a decision variable.
+    dtype: bool
+    default: false
+
+variables:
+  demand_share_per_timestep_decision:
+    description: Relative share of a carrier's demand met by a technology at a node, constant over time.
+    unit: unitless
+    default: 0
+    foreach: [nodes, techs, carriers]
+    where: demand_share_per_timestep_decision_member AND carrier_out
+    bounds:
+      min: 0
+      max: .inf

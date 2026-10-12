@@ -1,0 +1,33 @@
+builtins = ["snakemake"]
+target-version = "py312"
+line-length = 120
+extend-exclude = ["resources", "results", "tests/fixtures/mini_legacy/run.py"]
+
+[format]
+skip-magic-trailing-comma = true
+
+[lint]
+select = ["E", "F", "I", "Q", "W", "D", "PT", "UP"]
+# line too long; the formatter handles these
+ignore = ["E501"]
+
+[lint.isort]
+split-on-trailing-comma = false
+
+[lint.mccabe]
+# Unlike Flake8, default to a complexity level of 10.
+max-complexity = 10
+
+# Ignore `E402` (import violations) and `F401` (unused imports) in all `__init__.py` files
+[lint.per-file-ignores]
+"__init__.py" = ["E402", "F401", "D104"]
+"*.ipynb" = ["E402"]
+"tests/*" = ["D103"]
+# Internal package: public API functions are documented; helpers need not be.
+"workflow/scripts/converter/*" = ["D101", "D102", "D103", "D105", "D107"]
+
+[lint.flake8-quotes]
+docstring-quotes = "double"
+
+[lint.pydocstyle]
+convention = "google"

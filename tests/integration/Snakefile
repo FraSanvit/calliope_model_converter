@@ -1,0 +1,35 @@
+# Emulate a user configuring the module.
+configfile: workflow.source_path("./test_config.yaml")
+
+
+# Import the module and configure it.
+# `pathvars:` re-wires where the module finds its inputs and places its outputs.
+module calliope_model_converter:
+    pathvars:
+        # The legacy model is a test fixture instead of a user resource
+        legacy_model="../fixtures/{model}",
+        # Redirect module results
+        converted_model="results/converted/{model}",
+        conversion_report="results/reports/{model}.md",
+        conversion_report_json="results/reports/{model}.json",
+        # Redirect intermediate files that are internal to the module
+        logs="resources/module/logs",
+        resources="resources/module/resources",
+        results="resources/module/results",
+    snakefile:
+        "../../workflow/Snakefile"
+    config:
+        config["calliope_model_converter"]
+
+
+# rename all module rules with a prefix, to avoid naming conflicts.
+use rule * from calliope_model_converter as calliope_model_converter_*
+
+
+# Request something from the module
+rule all:
+    default_target: True
+    input:
+        "results/reports/mini_legacy.md",
+    message:
+        "Convert the mini legacy test model."

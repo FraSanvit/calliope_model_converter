@@ -1,0 +1,19 @@
+# Legacy Calliope v0.6 SPORES `objective_cost_class`.
+#
+# v0.6 SPORES minimised a weighted sum of cost classes ({spores_score: 1, excl_score: 10, ...}).
+# v0.7 scores `flow_cap` internally (`spores_score`); this adds the other legacy
+# cost classes (e.g. `excl_score`) to the SPORES objective with their legacy weights.
+
+parameters:
+  spores_objective_cost_weights:
+    description: Legacy `run.spores_options.objective_cost_class` weights of non-score cost classes.
+    default: 0
+    unit: unitless
+
+objectives:
+  min_spores:
+    equations:
+      - expression: >-
+          sum(flow_cap * spores_score, over=[nodes, techs, carriers]) +
+          sum(sum(cost, over=[nodes, techs]) * spores_objective_cost_weights, over=costs) +
+          $unmet_demand

@@ -1,0 +1,33 @@
+overrides:
+    ev_at_c:
+        locations.C.techs.ev_battery:
+    ev_everywhere:
+        locations:
+            B,C:
+                techs:
+                    ev_battery:
+    cheap_battery:
+        techs.battery.costs.monetary.storage_cap: 10
+        techs.battery.constraints.energy_cap_per_storage_cap_max: 0.5
+    no_hydro:
+        techs.hydro_reservoir.exists: false
+    res_2h:
+        model.time:
+            function: resample
+            function_options.resolution: 2H
+    spores_run:
+        run.mode: spores
+        run.spores_options:
+            spores_number: 2
+            slack: 0.1
+            score_cost_class: spores_score
+            save_per_spore_path: "outputs/spore_{}"
+            objective_cost_class: {spores_score: 1, excl_score: 0}
+        tech_groups.pv_group.costs.spores_score: {energy_cap: 0, interest_rate: 0}
+        techs.battery.costs.excl_score: {energy_cap: 0, interest_rate: 0}
+    unknown_tech_override:
+        techs.not_in_this_model.constraints.energy_cap_max: 1
+scenarios:
+    ev: [ev_at_c, ev_everywhere]
+    policy: [co2_cap, renewable_share, annual_gas_use]
+    everything: [ev_at_c, cheap_battery, co2_cap, renewable_share, heat_share_decision]

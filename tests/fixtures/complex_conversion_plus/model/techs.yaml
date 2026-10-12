@@ -1,0 +1,86 @@
+# v0.6.9 docs, advanced constraints: "Complex fictional technology" (AND across tiers, OR within tiers)
+# plus supplies and sinks for every carrier.
+techs:
+    complex:
+        essentials:
+            name: Complex fictional technology
+            parent: conversion_plus
+            carrier_in: [coal, gas, oil]
+            carrier_in_2: [biomass, waste]
+            carrier_out: [high_T_heat, electricity]
+            carrier_out_2: [mid_T_heat, cooling]
+            carrier_out_3: low_T_heat
+            primary_carrier_out: electricity
+        constraints:
+            energy_eff: 1
+            energy_cap_max: 100
+            lifetime: 25
+            carrier_ratios:
+                carrier_in: {coal: 1.2, gas: 1, oil: 1.6}
+                carrier_in_2: {biomass: 1, waste: 1.25}
+                carrier_out: {high_T_heat: 0.8, electricity: 0.6}
+                carrier_out_2: {mid_T_heat: 0.3, cooling: 0.2}
+                carrier_out_3.low_T_heat: 0.15
+        costs.monetary: {energy_cap: 10, interest_rate: 0.1}
+    supply_coal:
+        essentials:
+            name: coal supply
+            parent: supply
+            carrier: coal
+        constraints: {resource: .inf, energy_cap_max: 1000, lifetime: 25}
+        costs.monetary: {om_prod: 0.03, interest_rate: 0.1}
+    supply_gas:
+        essentials:
+            name: gas supply
+            parent: supply
+            carrier: gas
+        constraints: {resource: .inf, energy_cap_max: 1000, lifetime: 25}
+        costs.monetary: {om_prod: 0.05, interest_rate: 0.1}
+    supply_oil:
+        essentials:
+            name: oil supply
+            parent: supply
+            carrier: oil
+        constraints: {resource: .inf, energy_cap_max: 1000, lifetime: 25}
+        costs.monetary: {om_prod: 0.02, interest_rate: 0.1}
+    supply_biomass:
+        essentials:
+            name: biomass supply
+            parent: supply
+            carrier: biomass
+        constraints: {resource: .inf, energy_cap_max: 1000, lifetime: 25}
+        costs.monetary: {om_prod: 0.01, interest_rate: 0.1}
+    supply_waste:
+        essentials:
+            name: waste supply
+            parent: supply
+            carrier: waste
+        constraints: {resource: .inf, energy_cap_max: 1000, lifetime: 25}
+        costs.monetary: {om_prod: 0.04, interest_rate: 0.1}
+    demand_electricity:
+        essentials: {name: electricity demand, parent: demand, carrier: electricity}
+        constraints: {resource: file=demand.csv}
+    sink_high_T_heat:
+        essentials:
+            name: high_T_heat sink
+            parent: demand
+            carrier: high_T_heat
+        constraints: {resource: -.inf, force_resource: false}
+    sink_mid_T_heat:
+        essentials:
+            name: mid_T_heat sink
+            parent: demand
+            carrier: mid_T_heat
+        constraints: {resource: -.inf, force_resource: false}
+    sink_cooling:
+        essentials:
+            name: cooling sink
+            parent: demand
+            carrier: cooling
+        constraints: {resource: -.inf, force_resource: false}
+    sink_low_T_heat:
+        essentials:
+            name: low_T_heat sink
+            parent: demand
+            carrier: low_T_heat
+        constraints: {resource: -.inf, force_resource: false}

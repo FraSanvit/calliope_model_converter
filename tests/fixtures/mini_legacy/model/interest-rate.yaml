@@ -1,0 +1,12 @@
+# Extends built-in abstract bases (v0.6 feature): becomes `base_*` templates.
+tech_groups:
+    supply:
+        costs.monetary.interest_rate: 0.07
+    conversion:
+        costs.monetary.interest_rate: 0.07
+    conversion_plus:
+        costs.monetary.interest_rate: 0.07
+    storage:
+        costs.monetary.interest_rate: 0.07
+    transmission:
+        costs.monetary.interest_rate: 0.07

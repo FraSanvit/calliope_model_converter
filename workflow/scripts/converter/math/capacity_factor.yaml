@@ -1,0 +1,45 @@
+# Legacy run.py `capacity_factor_min_constraint` / `capacity_factor_max_constraint`: annual capacity factor limits,
+# in the form of the math gallery `annual_capacity_factor_min/max` (uptime_downtime_limits).
+# As run.py: the weighted outflow of the primary output carrier (v0.6 had one `energy_cap`) over the horizon is
+# compared with `flow_cap * capacity_factor * horizon hours` (v0.6 `get_timestep_weight * 8760`).
+
+parameters:
+  capacity_factor_min:
+    default: .nan
+    unit: fraction
+    resample_method: mean
+    description: "Legacy `capacity_factor_min`: minimum annual capacity factor."
+  capacity_factor_max:
+    default: .nan
+    unit: fraction
+    resample_method: mean
+    description: "Legacy `capacity_factor_max`: maximum annual capacity factor."
+
+lookups:
+  primary_carrier_out:
+    description: Primary output carrier of multi-output techs (v0.6 `primary_carrier_out`).
+    dtype: bool
+    default: false
+
+constraints:
+  capacity_factor_min_limit:
+    description: Legacy run.py `capacity_factor_min_constraint`.
+    foreach: [nodes, techs, carriers]
+    where: >-
+      capacity_factor_min AND carrier_out
+      AND (primary_carrier_out OR NOT any(primary_carrier_out, over=carriers))
+    equations:
+      - expression: >-
+          sum(flow_out * timestep_weights, over=timesteps) >=
+          flow_cap * capacity_factor_min * sum(timestep_resolution * timestep_weights, over=timesteps)
+
+  capacity_factor_max_limit:
+    description: Legacy run.py `capacity_factor_max_constraint`.
+    foreach: [nodes, techs, carriers]
+    where: >-
+      capacity_factor_max AND carrier_out
+      AND (primary_carrier_out OR NOT any(primary_carrier_out, over=carriers))
+    equations:
+      - expression: >-
+          sum(flow_out * timestep_weights, over=timesteps) <=
+          flow_cap * capacity_factor_max * sum(timestep_resolution * timestep_weights, over=timesteps)

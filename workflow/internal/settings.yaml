@@ -1,0 +1,26 @@
+# Module settings that users cannot modify.
+# Files of the converter package, delivered alongside the workflow (see workflow/Snakefile).
+converter_files:
+  - converter/__init__.py
+  - converter/builder.py
+  - converter/compare.py
+  - converter/fixed_design.py
+  - converter/config.py
+  - converter/context.py
+  - converter/convert.py
+  - converter/diagnostics.py
+  - converter/groups.py
+  - converter/legacy.py
+  - converter/math/demand_share_per_timestep_decision.yaml
+  - converter/math/spores_objective.yaml
+  - converter/math/time_varying_limits.yaml
+  - converter/math/storage_charge_depth.yaml
+  - converter/math/capacity_factor.yaml
+  - converter/math/om_investment_fraction.yaml
+  - converter/report.py
+  - converter/rules.py
+  - converter/runpy_inspector.py
+  - converter/runscripts.py
+  - converter/techs.py
+  - converter/timeseries.py
+  - converter/writer.py

@@ -1,0 +1,31 @@
+group_constraints:
+    max_gas_cap_A:
+        techs: [gas_plant, chp]
+        locs: [A]
+        energy_cap_max: 50
+overrides:
+    annual_gas_use:
+        group_constraints:
+            gas_use_A:
+                techs: [boiler]
+                locs: [A]
+                carrier_con_max:
+                    gas: -1000
+    co2_cap:
+        group_constraints:
+            systemwide_co2:
+                locs: [A, B, C]
+                cost_max.co2: 100
+    renewable_share:
+        group_constraints:
+            res_share:
+                techs: [pv, hydro_reservoir]
+                locs: [A, B]
+                demand_share_min.electricity: 0.1
+    heat_share_decision:
+        run.relax_constraint.demand_share_per_timestep_decision_main_constraint: 0.01
+        group_constraints:
+            heat_decision_A:
+                techs: [boiler, heat_pump]
+                locs: [A]
+                demand_share_per_timestep_decision.heat: .inf

@@ -1,0 +1,7 @@
+calliope_model_converter:
+  models:
+    mini_legacy: {}
+  exclude_entries: ["*_.yaml"]
+  trim_timeseries: true
+  copy_csvs: true
+  contract_group_families: true

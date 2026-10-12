@@ -1,0 +1,191 @@
+tech_groups:
+    pv_group:
+        essentials:
+            name: 'PV group'
+            parent: supply
+            carrier: electricity
+        constraints:
+            resource_unit: energy_per_cap
+            lifetime: 25
+    ac_transmission:
+        essentials:
+            name: 'AC transmission'
+            parent: transmission
+            carrier: electricity
+        constraints:
+            energy_eff_per_distance: 0.9999999
+            lifetime: 60
+        costs.monetary.om_annual_investment_fraction: 0.01
+
+techs:
+    pv:
+        essentials:
+            name: 'Solar PV'
+            parent: pv_group
+        constraints:
+            resource: file=cf-pv.csv
+            energy_cap_max: 20
+            energy_cap_max_time_varying: "file=charging-profile.csv"  # run.py custom limit
+        costs:
+            monetary:
+                energy_cap: 300
+                om_prod: 0.001
+    gas_plant:
+        essentials.name: 'Gas power plant'
+        essentials.parent: supply
+        essentials.carrier: electricity
+        constraints:
+            energy_eff: 0.5
+            energy_cap_max: inf
+            lifetime: 25
+        costs:
+            monetary:
+                energy_cap: 500
+                om_con: 0.03
+            co2:
+                om_con: 0.2
+    hydro_reservoir:
+        essentials:
+            name: 'Hydro reservoir'
+            parent: supply_plus
+            carrier: electricity
+        constraints:
+            resource: file=cf-pv.csv
+            resource_unit: energy_per_cap
+            energy_eff: 0.9
+            storage_cap_max: 50
+            lifetime: 60
+        costs.monetary.energy_cap: 100
+    battery:
+        essentials:
+            name: 'Battery'
+            parent: storage
+            carrier: electricity
+        constraints:
+            energy_eff: 0.95
+            energy_cap_per_storage_cap_max: 0.25
+            storage_loss: 0
+            lifetime: 15
+        costs:
+            monetary:
+                energy_cap: 50
+                storage_cap: 100
+                om_prod: 0.0001
+    ev_battery:
+        essentials:
+            name: 'EV battery'
+            parent: storage
+            carrier: electricity
+        constraints:
+            energy_cap_max_time_varying_con: "file=charging-profile.csv"
+            lifetime: 12
+    boiler:
+        essentials:
+            name: 'Gas boiler'
+            parent: conversion
+            carrier_in: gas
+            carrier_out: heat
+        constraints:
+            energy_eff: 0.9
+            lifetime: 20
+        costs:
+            monetary:
+                energy_cap: 50
+                om_annual: 1
+                om_con: 0.001
+    gas_supply:
+        essentials:
+            name: 'Gas supply'
+            parent: supply
+            carrier: gas
+        costs.monetary.om_prod: 0.03
+    chp:
+        essentials:
+            name: 'CHP'
+            parent: conversion_plus
+            carrier_in: gas
+            carrier_out: electricity
+            carrier_out_2: heat
+            primary_carrier_out: electricity
+        constraints:
+            energy_eff: 0.4
+            carrier_ratios.carrier_out_2.heat: 1.2
+            cb: 0.8
+            cv: 0.15
+            lifetime: 25
+        costs:
+            monetary:
+                energy_cap: 700
+                om_prod: 0.002
+    heat_pump:
+        essentials:
+            name: 'Heat pump'
+            parent: conversion_plus
+            carrier_in: electricity
+            carrier_out: heat
+            primary_carrier_out: heat
+        constraints:
+            carrier_ratios:
+                carrier_out:
+                    heat: "file=cop-hp.csv"
+            lifetime: 20
+            energy_cap_equals_time_varying: "file=charging-profile.csv"  # run.py custom limit
+        costs.monetary.energy_cap: 400
+    demand_elec:
+        essentials:
+            name: 'Electricity demand'
+            parent: demand
+            carrier: electricity
+        constraints:
+            resource: file=demand-elec.csv
+    cchp:  # v0.6.9 docs, advanced constraints: Combined cooling, heat and power (OR within tier 2)
+        essentials:
+            name: 'Combined cooling, heat and power'
+            parent: conversion_plus
+            carrier_in: gas
+            carrier_out: electricity
+            carrier_out_2: [heat, cooling]
+            primary_carrier_out: electricity
+        constraints:
+            energy_eff: 0.45
+            energy_cap_max: 100
+            carrier_ratios.carrier_out_2: {heat: 0.8, cooling: 0.5}
+            lifetime: 25
+        costs.monetary.energy_cap: 900
+    ahp:  # v0.6.9 docs, advanced constraints: Air source heat pump (OR within tier 1)
+        essentials:
+            name: 'Air source heat pump'
+            parent: conversion_plus
+            carrier_in: electricity
+            carrier_out: [heat, cooling]
+            primary_carrier_out: heat
+        constraints:
+            energy_eff: 1
+            energy_cap_max: 100
+            lifetime: 20
+            energy_cap_max_time_varying: "file=charging-profile.csv"  # run.py limit on heat + cooling (several tier-1 outputs)
+            energy_cap_max_time_varying_con: "file=charging-profile.csv"  # run.py limit on the electricity input
+            carrier_ratios:
+                carrier_out:
+                    heat: 5
+                    cooling: 3
+        costs.monetary.energy_cap: 300
+    demand_cooling:
+        essentials:
+            name: 'Cooling demand'
+            parent: demand
+            carrier: cooling
+        constraints:
+            resource: -2
+    demand_heat:
+        essentials:
+            name: 'Heat demand'
+            parent: demand
+            carrier: heat
+        constraints:
+            resource: file=demand-heat.csv
+    ac_line:
+        essentials:
+            name: 'AC line'
+            parent: ac_transmission
+        costs.monetary.energy_cap: 20

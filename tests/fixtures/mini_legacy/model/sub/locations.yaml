@@ -1,0 +1,42 @@
+locations:
+    A,B:
+        techs:
+            pv:
+            gas_plant:
+            battery:
+            demand_elec:
+            demand_heat:
+            boiler:
+            gas_supply:
+            heat_pump:
+    A:
+        coordinates: {lat: 45.0, lon: 8.0}
+        available_area: 10
+        techs:
+            chp:
+            hydro_reservoir:
+                constraints:
+                    energy_cap_max: 5
+    B:
+        coordinates: {lat: 45.5, lon: 8.5}
+        techs:
+            cchp:
+            ahp:
+            demand_cooling:
+            pv.constraints.energy_cap_max: 10
+            pv.costs.monetary.energy_cap: 350
+    C:
+        coordinates: {lat: 46.0, lon: 9.0}
+        techs:
+            demand_elec:
+            gas_plant:
+links:
+    A,B.techs:
+        ac_line:
+            constraints:
+                energy_cap_max: 10
+    B,C:
+        techs:
+            ac_line:
+                constraints.energy_cap_max: 10
+                costs.monetary.energy_cap: 25

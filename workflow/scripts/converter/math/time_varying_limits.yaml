@@ -1,0 +1,61 @@
+# Legacy run.py time-varying capacity limits, translated from the v0.6 custom constraints
+#   carrier_production_max_time_varying_constraint     (`energy_cap_max_time_varying`)
+#   carrier_production_equals_time_varying_constraint  (`energy_cap_equals_time_varying`)
+#   carrier_consumption_max_time_varying_constraint    (`energy_cap_max_time_varying_con`)
+# following the math gallery `max_time_varying` (https://calliope.readthedocs.io/en/latest/examples/math_gallery/max_time_varying/),
+# (outflow limits include `flow_out_parasitic_eff`, as the gallery and the standard `flow_out_max` do),
+# with an inflow (consumption) variant and two differences that keep the legacy behaviour:
+#   - flows are per timestep, so the capacity is multiplied by `timestep_resolution` (as in run.py);
+#   - where a time-varying limit applies, it replaces the standard `flow_out_max` / `flow_in_max` (run.py removed
+#     these techs from the standard constraints, so a value above 1 does allow more than the capacity).
+# Conversion techs with several tier-1 outputs, or with an inflow limit, get per-tech constraints instead (added by
+# the converter): v0.6 measured the sum of their tier-1 flows against the one `energy_cap`, i.e. the primary output's
+# `flow_cap`.
+
+parameters:
+  flow_cap_max_relative_per_ts:
+    default: .nan
+    unit: fraction
+    resample_method: mean  # as v0.6 (v0.7 defaults custom parameters to `first`)
+    description: >-
+      Legacy `energy_cap_max_time_varying`: maximum outflow in each timestep, relative to the flow capacity.
+  flow_cap_equals_relative_per_ts:
+    default: .nan
+    unit: fraction
+    resample_method: mean  # as v0.6 (v0.7 defaults custom parameters to `first`)
+    description: >-
+      Legacy `energy_cap_equals_time_varying`: outflow in each timestep, relative to the flow capacity.
+  flow_in_max_relative_per_ts:
+    default: .nan
+    unit: fraction
+    resample_method: mean  # as v0.6 (v0.7 defaults custom parameters to `first`)
+    description: >-
+      Legacy `energy_cap_max_time_varying_con`: maximum inflow in each timestep, relative to the flow capacity.
+
+constraints:
+  flow_out_max:
+    where: carrier_out AND NOT flow_cap_max_relative_per_ts AND NOT flow_cap_equals_relative_per_ts
+
+  flow_in_max:
+    where: carrier_in AND NOT flow_in_max_relative_per_ts
+
+  max_time_varying_flow_out:
+    description: Legacy `carrier_production_max_time_varying_constraint`.
+    foreach: [nodes, techs, carriers, timesteps]
+    where: carrier_out AND flow_cap_max_relative_per_ts
+    equations:
+      - expression: flow_out <= flow_cap * timestep_resolution * flow_out_parasitic_eff * flow_cap_max_relative_per_ts
+
+  equals_time_varying_flow_out:
+    description: Legacy `carrier_production_equals_time_varying_constraint`.
+    foreach: [nodes, techs, carriers, timesteps]
+    where: carrier_out AND flow_cap_equals_relative_per_ts
+    equations:
+      - expression: flow_out == flow_cap * timestep_resolution * flow_out_parasitic_eff * flow_cap_equals_relative_per_ts
+
+  max_time_varying_flow_in:
+    description: Legacy `carrier_consumption_max_time_varying_constraint` (the inflow variant).
+    foreach: [nodes, techs, carriers, timesteps]
+    where: carrier_in AND flow_in_max_relative_per_ts
+    equations:
+      - expression: flow_in <= flow_cap * timestep_resolution * flow_in_max_relative_per_ts

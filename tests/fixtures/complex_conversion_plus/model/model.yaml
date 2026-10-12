@@ -1,0 +1,26 @@
+import:
+    - techs.yaml
+model:
+    name: complex test
+    calliope_version: 0.6.9
+    timeseries_data_path: './'
+    subset_time: ['2018-01-01', '2018-01-01']
+run:
+    solver: highs
+    mode: plan
+    objective_options.cost_class: {monetary: 1}
+locations:
+    X:
+        coordinates: {lat: 45, lon: 8}
+        techs:
+            complex:
+            supply_coal:
+            supply_gas:
+            supply_oil:
+            supply_biomass:
+            supply_waste:
+            demand_electricity:
+            sink_high_T_heat:
+            sink_mid_T_heat:
+            sink_cooling:
+            sink_low_T_heat:

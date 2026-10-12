@@ -1,0 +1,57 @@
+import yaml
+
+from snakemake.utils import min_version, validate
+
+min_version("9.19")
+
+
+# Define pathvars for all user resource files and result files.
+# This allows users to re-wire how the module is used in their workflow with ease.
+pathvars:
+    # User resources
+    legacy_model="<resources>/user/{model}",
+    # Module results
+    converted_model="<results>/{model}/model",
+    conversion_report="<results>/{model}/conversion_report.md",
+    conversion_report_json="<results>/{model}/conversion_report.json",
+    # Comparison of user-provided v0.6 and v0.7 runs (optional)
+    comparison_runs="<resources>/user/{model}/comparison/{case}",
+    comparison_report="<results>/{model}/comparison/{case}/comparison.md",
+    # Optional fixed-design check of a comparison case (needs one more user-run solve)
+    fixed_design_report="<results>/{model}/comparison/{case}/fixed_design.md",
+
+
+# Load the example configuration. This will be overridden by users.
+configfile: workflow.source_path("../config/config.yaml")
+
+
+# Validate the configuration using the schema file.
+validate(config, workflow.source_path("internal/config.schema.yaml"))
+
+# Load internal settings separately so users cannot modify them.
+with open(workflow.source_path("internal/settings.yaml"), "r") as f:
+    internal = yaml.safe_load(f)
+
+
+include: "rules/convert.smk"
+include: "rules/compare.smk"
+include: "rules/fixed_design.smk"
+
+
+# Deliver the converter package alongside the workflow (it is imported, never run as a script).
+for _file in internal["converter_files"]:
+    workflow.source_path(f"scripts/{_file}")
+
+
+rule all:
+    default_target: True
+    output:
+        "INVALID",
+    log:
+        stderr="<logs>/all.stderr",
+    conda:
+        "envs/module.yaml"
+    message:
+        "ERROR: Invalid `rule all:` call"
+    shell:
+        'echo "This workflow must be called as a snakemake module." > {log.stderr}'

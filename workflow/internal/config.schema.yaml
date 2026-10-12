@@ -1,0 +1,46 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+description: "Schema for user-provided configuration files."
+type: object
+additionalProperties: false
+required: [models]
+properties:
+  models:
+    description: >-
+      Legacy models to convert, keyed by their folder name in `resources/user/`.
+      Each folder must contain `model/` (and usually `run.py`).
+    type: object
+    minProperties: 1
+    additionalProperties:
+      type: [object, "null"]
+      additionalProperties: false
+      properties:
+        entry:
+          description: >-
+            Entry YAML of the legacy model, relative to its `model/` folder.
+            Auto-detected (YAML with a top-level `model:` key) if omitted.
+          type: string
+  exclude_entries:
+    description: Glob patterns of YAML file names never treated as model entry files.
+    type: array
+    items:
+      type: string
+    default: ["*_.yaml"]
+  trim_timeseries:
+    description: >-
+      Keep only the timesteps within the legacy `model.subset_time` (union over the base model and
+      all overrides). Calliope v0.7 loads whole tables before subsetting, so unused years cost memory.
+    type: boolean
+    default: true
+  contract_group_families:
+    description: >-
+      Write per-region copies of a legacy group (e.g. `biofuel_1..4`, one location each, same techs and
+      constraints) as one group whose values are indexed on `nodes` (fewer constraints and lookups, same rows).
+      `false` keeps one constraint per legacy group.
+    type: boolean
+    default: true
+  copy_csvs:
+    description: >-
+      Copy every legacy CSV into the converted model. Disable only for quick tests:
+      the converted model then lacks its timeseries.
+    type: boolean
+    default: true

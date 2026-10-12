@@ -1,0 +1,19 @@
+# Legacy `storage_charge_depth` (added in a branch of Calliope v0.6): the maximum state of charge in each timestep,
+# the mirror of v0.7's own `storage_discharge_depth` (`storage_discharge_depth_limit`: minimum state of charge).
+# Time-varying values (a `file=` CSV) are allowed, as for the discharge depth.
+
+parameters:
+  storage_charge_depth:
+    default: .nan
+    unit: fraction
+    resample_method: mean  # as v0.6 (v0.7 defaults custom parameters to `first`)
+    description: >-
+      Legacy `storage_charge_depth`: maximum stored carrier, as a fraction of the storage capacity, in each timestep.
+
+constraints:
+  storage_charge_depth_limit:
+    description: Set the upper bound of the stored carrier (maximum state of charge) in each timestep.
+    foreach: [nodes, techs, timesteps]
+    where: "storage AND storage_charge_depth"
+    equations:
+      - expression: storage - storage_charge_depth * storage_cap <= 0

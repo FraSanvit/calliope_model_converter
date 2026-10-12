@@ -1,0 +1,15 @@
+# Changelog
+
+## 0.1.0 (unreleased)
+
+- First version: converts legacy Calliope v0.6 models (techs, tech_groups, locations, links,
+  timeseries, costs, conversion_plus, group constraints, demand_share_per_timestep_decision,
+  overrides/scenarios, run scripts, SPORES config) into Calliope v0.7.0 models.
+- Reports the custom math of the legacy `run.py` with math-gallery matches, and translates it as run.py writes it:
+  time-varying limits, fuel distribution, EV battery capacity (`storage_ev_constraint`), capacity factors and
+  per-month production. CHP `cb`/`cv`/p2h are reported only.
+- Bridges structural v0.6/v0.7 differences (O&M investment fraction, resampling, objective cost classes, node names,
+  x/y link distances, ...): `docs/conventions.md`, section 16.
+- Optional `compare` and `fixed_design` rules to check a converted model against its legacy original on
+  user-provided runs (`docs/consistency.md`).
+- Snakemake module following the Modelblocks convention v1.

@@ -1,0 +1,14 @@
+# Example configuration of the Calliope v0.6 -> v0.7 model converter.
+models:
+  # Folder names in resources/user/; each holds a legacy model (model/, run.py, ...).
+  ERS_test_example: {}
+  national_scale: {}  # Calliope v0.6.10 example model
+  urban_scale: {}  # Calliope v0.6.10 example model
+  # Add more folders here (e.g. 2030_ERS_eurospores) to convert them too.
+# YAML files matching these patterns are never used as the model entry file.
+exclude_entries: ["*_.yaml"]
+# Keep only the timesteps used by the legacy model (`subset_time`).
+trim_timeseries: true
+copy_csvs: true
+# One node-indexed group per family of per-region legacy groups (false: one per legacy group).
+contract_group_families: true

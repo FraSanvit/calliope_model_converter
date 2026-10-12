@@ -1,0 +1,15 @@
+# Legacy `om_annual_investment_fraction` (v0.7 `cost_om_annual_investment_fraction`) is a fraction of the
+# *annualised* investment cost in v0.6 (backend/pyomo/constraints/costs.py: `cost_fractional_om =
+# fraction * cost_cap`, where `cost_cap` is already depreciated and scaled to the modelled period).
+# v0.7's base math applies it to the whole (lifetime) investment instead, which is 1 / annuity factor times larger
+# (13.5x for 60 years at 7.3%). The fixed O&M cost is redefined here as in v0.6; only its equation changes.
+
+global_expressions:
+  cost_operation_fixed:
+    equations:
+      - expression: >-
+          $annualisation_weight * sum(cost_om_annual * flow_cap, over=carriers) +
+          cost_investment_annualised * cost_om_annual_investment_fraction
+    sub_expressions:
+      annualisation_weight:
+        - expression: sum(timestep_resolution * timestep_weights, over=timesteps) / 8760

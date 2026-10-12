@@ -1,0 +1,86 @@
+[workspace]
+name = "calliope_model_converter"
+authors = ["See AUTHORS file"]
+description = "Convert legacy Calliope v0.6 models into Calliope v0.7 models."
+license = "Apache-2.0"
+readme = "README.md"
+channels = ["conda-forge", "bioconda"]
+platforms = ["win-64", "linux-64", "osx-arm64"]
+homepage = "https://www.modelblocks.org/"
+
+[dependencies]
+clio-tools = ">=2026.06.23"
+conda = ">=25.0.0"
+hypothesis = ">=6.100"
+ipdb = ">=0.13.13"
+ipykernel = ">=6.29.5"
+jsonschema = ">=4.0.0"
+mypy = ">=1.15.0"
+pandas = ">=2.1.3"
+pandera = ">=0.20"
+pytest = ">=8.3.5"
+python = ">=3.12"
+"ruamel.yaml" = ">=0.18"
+xarray = ">=2024.1"
+netcdf4 = ">=1.6"
+matplotlib-base = ">=3.8"
+ruff = ">=0.9.9"
+snakefmt = ">=0.10.2"
+snakemake-minimal = ">=9.19.0"
+pytz = ">=2026.1.post1"
+graphviz = ">=12"
+
+# Runtime environment of the `convert` rule (kept lean, conda-forge only).
+[feature.module.dependencies]
+python = ">=3.12"
+pandas = ">=2.1.3"
+pandera = ">=0.20"
+"ruamel.yaml" = ">=0.18"
+xarray = ">=2024.1"
+netcdf4 = ">=1.6"
+matplotlib-base = ">=3.8"
+
+# Calliope v0.7 environment: used to check converted models (spike now, `validate` rule later).
+[feature.calliope.dependencies]
+python = ">=3.12"
+calliope = "==0.7.0"
+highspy = "*"
+pandera = ">=0.20"
+pytest = ">=8.3.5"
+hypothesis = ">=6.100"
+
+[environments]
+module = { features = ["module"], no-default-feature = true }
+calliope = { features = ["calliope"], no-default-feature = true }
+
+[tasks]
+test = { cmd = "pytest tests --ignore=tests/integration_test.py -m 'not calliope'" }
+test-integration = { cmd = "pytest tests/integration_test.py" }
+# Workflow structure for the README (needs the ERS_test_example inputs, incl. its comparison case week_1h).
+dag = { cmd = "snakemake -s workflow/Snakefile --filegraph results/ERS_test_example/conversion_report.md results/ERS_test_example/comparison/week_1h/comparison.md results/ERS_test_example/comparison/week_1h/fixed_design.md | dot -Tpng -Gdpi=130 -o docs/figures/dag.png" }
+
+[feature.calliope.tasks]
+test-calliope = { cmd = "pytest tests/test_calliope.py" }
+
+[tasks.export-snakemake-env]
+description = "Export one Pixi environment as Snakemake-compatible conda files"
+args = ["env", { arg = "outdir", default = "workflow/envs" }]
+depends-on = [
+  { task = "_export-snakemake-pin", args = ["{{ env }}", "win-64", "{{ outdir }}"] },
+  { task = "_export-snakemake-pin", args = ["{{ env }}", "linux-64", "{{ outdir }}"] },
+  { task = "_export-snakemake-pin", args = ["{{ env }}", "osx-arm64", "{{ outdir }}"] },
+]
+cmd = "pixi workspace export conda-environment --environment '{{ env }}' '{{ outdir }}/{{ env }}.yaml'"
+
+[tasks._export-snakemake-pin]
+description = "Export one Pixi environment/platform as a Snakemake-compatible pin file"
+args = ["env", "platform", "outdir"]
+depends-on = [
+  { task = "_export-conda-explicit-spec", args = ["{{ env }}", "{{ platform }}", "{{ outdir }}"] },
+]
+cmd = "mv '{{ outdir }}/{{ env }}_{{ platform }}_conda_spec.txt' '{{ outdir }}/{{ env }}.{{ platform }}.pin.txt'"
+
+[tasks._export-conda-explicit-spec]
+description = "Export one Pixi environment/platform as an explicit conda spec file"
+args = ["env", "platform", "outdir"]
+cmd = "pixi workspace export conda-explicit-spec --environment '{{ env }}' --platform '{{ platform }}' '{{ outdir }}'"

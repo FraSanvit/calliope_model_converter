@@ -1,0 +1,17 @@
+import:
+    - '../interest-rate.yaml'
+    - '../techs.yaml'
+    - './locations.yaml'
+    - './groups.yaml'
+    - '../overrides-extra/extra.yaml'
+model:
+    name: 'Mini legacy model'
+    calliope_version: 0.6.8
+    timeseries_data_path: './'
+    subset_time: ['2018-01-01', '2018-01-02']
+run:
+    objective_options.cost_class: {monetary: 1}
+    solver: cbc
+    mode: plan
+    ensure_feasibility: true
+    bigM: 1e6

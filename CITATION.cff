@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Calliope model converter: legacy Calliope v0.6 to Calliope v0.7"
+authors:
+  - family-names: Sanvito
+    given-names: Francesco
+    email: sanvitofrancesco@gmail.com
+license: Apache-2.0
+version: 0.1.0
+date-released: 2026-10-06
+keywords:
+  - energy system modelling
+  - Calliope
+  - Snakemake
+  - Modelblocks

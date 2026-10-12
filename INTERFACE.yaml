@@ -1,0 +1,54 @@
+# Module Input-Output structure for automated docs generation
+convention_version: v1.0.0
+
+pathvars:
+  snakemake_defaults:
+    logs:
+      default: "<logs>"
+      description: location of snakemake log files.
+    resources:
+      default: "<resources>"
+      description: "location of module resource (input) files."
+    results:
+      default: "<results>"
+      description: "location of module result (output) files."
+  user_resources:
+    legacy_model:
+      default: "<resources>/user/{model}"
+      description: >-
+        Legacy Calliope v0.6 model folder: `model/` (tech YAMLs, overrides, `eurospores/` with locations,
+        links, group constraints and timeseries CSVs, and the entry `model-*.yaml`), plus `run.py`
+        (custom pyomo math, analysed and reported), `create_input.py` and `dual_utils.py`.
+    comparison_runs:
+      default: "<resources>/user/{model}/comparison/{case}"
+      description: >-
+        Optional, for the `compare` rule: runs produced by the user (not by this module) of one case, e.g. a time
+        window. `v06.nc` (legacy results) and `v07.nc` (results of the converted model).
+  results:
+    converted_model:
+      default: "<results>/{model}/model"
+      description: >-
+        Calliope v0.7 model mirroring the legacy file layout: YAML files, `data_tables/` (CSV),
+        `math/` (generated custom math). Load the converted entry file with `calliope.read_yaml`.
+    conversion_report:
+      default: "<results>/{model}/conversion_report.md"
+      description: Conversion report (run.py custom math, renamed parameters, warnings).
+    conversion_report_json:
+      default: "<results>/{model}/conversion_report.json"
+      description: Machine-readable version of the conversion report.
+    comparison_report:
+      default: "<results>/{model}/comparison/{case}/comparison.md"
+      description: >-
+        v0.6 vs v0.7 comparison of one case: objective and total costs, capacities, storage capacities and
+        total flows (also summed over nodes), with overall errors and a diagnostic figure. Full tables as CSV files
+        next to it.
+    fixed_design_report:
+      default: "<results>/{model}/comparison/{case}/fixed_design.md"
+      description: >-
+        Optional fixed-design check of one case (`fixed_design` rule): writes `fix_v06_design.yaml` (v0.6
+        capacities fixed in the converted model) next to it; once the user provides `v07_fixed.nc` in the case
+        folder (the converted model solved with that override), the verdict EQUIVALENT / COSTLIER / CHEAPER /
+        INFEASIBLE and the costs per tech. See docs/consistency.md.
+wildcards:
+  model: name of the legacy model folder (as listed under `models` in the configuration).
+  case: name of a comparison case folder under `comparison_runs` (e.g. `week_1h`).
