@@ -223,6 +223,7 @@ class ModelBuilder:
         self._add_activation_guards()
         self._add_dspt_members()
         self._complete_objective_weights()
+        self.config_conv.check_spores_objective()
         self._check_lifetimes()
         derived, generated = self._build_tables()
         self.per_month = self._per_month_table(generated)

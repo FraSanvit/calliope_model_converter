@@ -176,3 +176,30 @@ def test_group_family_named_after_override():
     )
     conv.contract_families([supply, demand], ["biofuel_maximum", "annual_fuel_demand"])
     assert [g.gid for g in supply.groups + demand.groups] == ["biofuel_maximum_biofuel", "annual_fuel_demand_biofuel"]
+
+
+def test_spores_objective_classes_must_be_declared_in_v06():
+    """v0.6 builds its objective from `objective_options.cost_class` only: undeclared SPORES classes are warned."""
+    diag = Diagnostics()
+    conv = ConfigConverter(diag)
+    conv.convert(None, {"objective_options": {"cost_class": {"monetary": 1}}}, "base", is_base=True)
+    conv.convert(
+        None,
+        {"spores_options": {"objective_cost_class": {"spores_score": 1, "pv": -1, "monetary": 0}}},
+        "a",
+        is_base=False,
+    )
+    conv.convert(
+        None,
+        {
+            "objective_options": {"cost_class": {"monetary": 1, "spores_score": 0, "pv": 0}},
+            "spores_options": {"objective_cost_class": {"spores_score": 1, "pv": 1}},
+        },
+        "b",
+        is_base=False,
+    )
+    conv.check_spores_objective()
+    warnings = [m for m in diag.messages if m.code == "spores_objective_v06"]
+    assert len(warnings) == 1
+    assert warnings[0].source == "a"
+    assert "['pv', 'spores_score']" in warnings[0].message

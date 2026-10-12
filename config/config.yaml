@@ -2,6 +2,7 @@
 models:
   # Folder names in resources/user/; each holds a legacy model (model/, run.py, ...).
   ERS_test_example: {}
+  ERS_test_example_spores: {}  # ERS_test_example + a SPORES override (PV min/max), for the SPORES comparison
   national_scale: {}  # Calliope v0.6.10 example model
   urban_scale: {}  # Calliope v0.6.10 example model
   # Add more folders here (e.g. 2030_ERS_eurospores) to convert them too.

@@ -51,10 +51,14 @@ def _resolution(value: Any) -> str | None:
 class ConfigConverter:
     def __init__(self, diag: Diagnostics):
         self.diag = diag
+        self.base_scope: str | None = None
+        self.declared_classes: dict[str, set[str]] = {}  # scope -> classes of `objective_options.cost_class`
+        self.spores_classes: dict[str, set[str]] = {}  # scope -> non-zero classes of SPORES `objective_cost_class`
 
     def convert(self, model: dict | None, run: dict | None, scope: str, *, is_base: bool) -> ConfigResult:
         result = ConfigResult()
         if is_base:
+            self.base_scope = scope
             result.set("init.calliope_version", "0.7.0")
             result.set("init.distance_unit", "m")  # v0.6 derived link distances in metres
         self._model(model or {}, scope, result)
@@ -153,6 +157,7 @@ class ConfigConverter:
     def _objective_options(self, options: dict, scope: str, result: ConfigResult) -> None:
         for key, value in options.items():
             if key == "cost_class":
+                self.declared_classes[scope] = set(value or {})
                 weights = {k: v for k, v in (value or {}).items() if k != SPORES_SCORE_CLASS}
                 if len(weights) != len(value or {}):
                     self.diag.info(
@@ -216,12 +221,33 @@ class ConfigConverter:
                     scope,
                 )
             elif key == "objective_cost_class":
+                self.spores_classes[scope] = {k for k, v in (value or {}).items() if v}
                 weights = {k: v for k, v in (value or {}).items() if k != SPORES_SCORE_CLASS}
                 if weights:
                     result.data_definitions["spores_objective_cost_weights"] = _costs_indexed(weights)
                     result.needs_spores_objective = True
             else:
                 self.diag.warn("unknown_run_key", f"`run.spores_options.{key}` has no v0.7 equivalent; dropped.", scope)
+
+    def check_spores_objective(self) -> None:
+        """v0.6 builds its objective from `objective_options.cost_class` only (Calliope 0.6 `backend/pyomo/model.py`).
+
+        Classes that `spores_options.objective_cost_class` adds later are never in the v0.6 objective unless declared
+        there (with weight 0): v0.6 then ran the SPORES without them, while v0.7 uses them. Warned, not changed.
+        """
+        base = self.declared_classes.get(self.base_scope or "", {"monetary"})
+        for scope, classes in sorted(self.spores_classes.items()):
+            declared = base | self.declared_classes.get(scope, set())
+            missing = sorted(classes - declared)
+            if missing:
+                self.diag.warn(
+                    "spores_objective_v06",
+                    f"SPORES `objective_cost_class` uses {missing}, not declared in `run.objective_options.cost_class` "
+                    "(base model or this override): Calliope 0.6 builds its objective from those classes only, so the "
+                    "v0.6 SPORES ignored them (unless another override of the scenario declares them), while v0.7 "
+                    "applies them. Declare them there with weight 0 to make the legacy run do what it meant.",
+                    scope,
+                )
 
 
 def merge_config(*results: ConfigResult) -> ConfigResult:

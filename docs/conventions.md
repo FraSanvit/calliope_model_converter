@@ -275,7 +275,7 @@ Plain renames (base-tech independent):
 | `run.spores_options.save_per_spore(_path)` | `config.solve.spores.save_per_spore_path` (a file pattern becomes its directory) |
 | `run.spores_options.score_cost_class` | techs with those costs get `spores_tracked: true` + `config.solve.spores.tracking_parameter` |
 | `run.spores_options.slack_cost_group` | replaced by v0.7's own `total_system_cost_max` (info) |
-| `run.spores_options.objective_cost_class` | `data_definitions.spores_objective_cost_weights` + `math/spores_objective.yaml` (e.g. `excl_score`) |
+| `run.spores_options.objective_cost_class` | `data_definitions.spores_objective_cost_weights` + `math/spores_objective.yaml` (e.g. `excl_score`). Calliope 0.6 builds its objective from `objective_options.cost_class` only, so SPORES classes not declared there (weight 0) were ignored by the v0.6 run but are applied in v0.7: warned (`spores_objective_v06`) |
 | `run.cyclic_storage: false` | per tech in v0.7 (`cyclic_storage: false` on storage techs; warned) |
 
 Unknown `model` / `run` keys are warned and dropped. Every converted model lists `system_balance` and its CO2 cap
