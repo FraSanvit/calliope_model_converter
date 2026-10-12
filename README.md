@@ -2,7 +2,7 @@
 
 A [Snakemake](https://snakemake.readthedocs.io/) module that converts legacy
 [Calliope](https://calliope.readthedocs.io/) **v0.6** models (e.g. Euro-Calliope / EuroSPORES / ERS models)
-into **Calliope v0.7.0** models. The layout follows the [Modelblocks](https://www.modelblocks.org/) convention.
+into **Calliope v0.7.0** models. The layout is inspired by the [Modelblocks](https://www.modelblocks.org/) convention.
 
 The converter reads the legacy YAML and CSV files directly; it never imports Calliope v0.6.
 It **does not run optimisations**: it converts the inputs, reports the legacy custom math, and the converted
@@ -116,4 +116,22 @@ model.results.shadow_price_system_balance  # duals of the energy balance
 
 ## Contributors
 
-See `AUTHORS`.
+Thanks to everyone who contributed ([emoji key](https://allcontributors.org/docs/en/emoji-key)). The list follows the
+[All Contributors](https://allcontributors.org) specification and is kept in `.all-contributorsrc`; copyright holders
+are listed in `AUTHORS`.
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/FraSanvit"><img src="https://avatars.githubusercontent.com/u/68587472?v=4?s=100" width="100px;" alt="Francesco Sanvito"/><br /><sub><b>Francesco Sanvito</b></sub></a><br /><a href="https://github.com/FraSanvit/calliope_model_converter/commits?author=FraSanvit" title="Code">💻</a> <a href="https://github.com/FraSanvit/calliope_model_converter/commits?author=FraSanvit" title="Documentation">📖</a> <a href="#ideas-FraSanvit" title="Ideas, Planning, & Feedback">🤔</a> <a href="#research-FraSanvit" title="Research">🔬</a> <a href="https://github.com/FraSanvit/calliope_model_converter/commits?author=FraSanvit" title="Tests">⚠️</a> <a href="#maintenance-FraSanvit" title="Maintenance">🚧</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
