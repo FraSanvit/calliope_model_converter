@@ -87,7 +87,7 @@ pixi run test                     # unit, robustness and end-to-end tests
 pixi run -e calliope test-calliope  # converted models load, build and solve with Calliope v0.7 (HiGHS)
 pixi run test-integration         # Modelblocks standard tests (incl. the integration workflow)
 pixi run dag                      # docs/figures/dag.png (workflow figure)
-pixi run python docs/figures/make_consistency_figure.py  # docs/figures/consistency_cases.png
+pixi run consistency-figure       # docs/figures/consistency_cases.png
 ```
 
 Converting a model in this repository (legacy models placed in `resources/user/<model>/`):

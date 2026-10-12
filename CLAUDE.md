@@ -57,11 +57,13 @@ Guidance for working on this repository.
   - `fixed_design.py`: optional fixed-design check (`fixed_design` rule, never a default target): writes
     `fix_v06_design.yaml` (v0.6 capacities fixed, slack 1e-6); the user's `v07_fixed.nc` gives the verdict
     EQUIVALENT / COSTLIER / CHEAPER / INFEASIBLE in `fixed_design.md`. How-to and tested cases: `docs/consistency.md`
-    (figure rebuilt by `docs/figures/make_consistency_figure.py`). Structural v0.6/v0.7 differences found this way
+    (figure rebuilt by `tools/make_consistency_figure.py`, `pixi run consistency-figure`). Structural v0.6/v0.7 differences found this way
     get a converter fix and a row in `docs/conventions.md` section 16.
   - `runscripts.py`: legacy run scripts (`run-*.py`) read statically -> v0.7 run script (settings verbatim,
     overrides by name, merged at runtime with v0.6 "later wins"; nothing added to the model YAML).
   - `math/`: static custom math.
+- `tools/`: developer scripts for the documentation figures in `docs/figures/` (`pixi run dag`,
+  `pixi run consistency-figure`); not part of the shipped module.
 - `workflow/internal/settings.yaml` lists the package files so Snakemake ships them. **Update it when adding files.**
 - `tests/fixtures/mini_legacy/`: small v0.6 model exercising every feature.
   `resources/` and `results/` are gitignored (the 2030 model is 2.9 GB).
@@ -76,7 +78,7 @@ big for this machine.
 pixi run test                        # unit + robustness (hypothesis) + end-to-end
 pixi run -e calliope test-calliope   # converted models load/build/solve in Calliope v0.7 (HiGHS)
 pixi run test-integration            # Modelblocks standard tests
-pixi run ruff check workflow tests && pixi run ruff format workflow tests && pixi run snakefmt workflow
+pixi run ruff check workflow tests tools && pixi run ruff format workflow tests tools && pixi run snakefmt workflow
 pixi run snakemake --cores 1 -s workflow/Snakefile results/ERS_test_example/conversion_report.md
 pixi run export-snakemake-env module # after changing the `module` pixi feature
 pixi run snakemake --cores 1 -s workflow/Snakefile results/ERS_test_example/comparison/week_1h/comparison.md

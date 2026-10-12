@@ -56,8 +56,10 @@ calliope = { features = ["calliope"], no-default-feature = true }
 [tasks]
 test = { cmd = "pytest tests --ignore=tests/integration_test.py -m 'not calliope'" }
 test-integration = { cmd = "pytest tests/integration_test.py" }
-# Workflow structure for the README (needs the ERS_test_example inputs, incl. its comparison case week_1h).
-dag = { cmd = "snakemake -s workflow/Snakefile --filegraph results/ERS_test_example/conversion_report.md results/ERS_test_example/comparison/week_1h/comparison.md results/ERS_test_example/comparison/week_1h/fixed_design.md | dot -Tpng -Gdpi=130 -o docs/figures/dag.png" }
+# Documentation figures (tools/): workflow structure (needs the ERS_test_example inputs, incl. its comparison
+# case week_1h) and the consistency checks on the tested cases (needs their comparison runs).
+dag = { cmd = "python tools/make_dag.py" }
+consistency-figure = { cmd = "python tools/make_consistency_figure.py" }
 
 [feature.calliope.tasks]
 test-calliope = { cmd = "pytest tests/test_calliope.py" }

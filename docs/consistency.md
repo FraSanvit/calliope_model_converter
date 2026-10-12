@@ -25,7 +25,7 @@ when summed (the same solution allocated differently across regions), except urb
 heat both ways in equal-cost ways. D-F: one plot per case, capacities (circles) and total flows (triangles) against
 the 1:1 line, each scaled to the largest value of its kind, coloured by the divergence from 1:1 on one shared scale;
 hollow markers are free capacities. Rebuild with
-`pixi run python docs/figures/make_consistency_figure.py`.*
+`pixi run consistency-figure` (`tools/make_consistency_figure.py`).*
 
 ## 1. Produce the runs
 

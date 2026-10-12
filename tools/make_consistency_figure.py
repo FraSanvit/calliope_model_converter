@@ -3,7 +3,7 @@
 Reads the user-provided runs in `resources/user/<model>/comparison/<case>/` (v06.nc, v07.nc and, for the
 fixed-design check, v07_fixed.nc) with the `compare` functions, so the figure can be rebuilt after any change:
 
-    pixi run python docs/figures/make_consistency_figure.py
+    pixi run consistency-figure
 
 Layout (2 x 3): total cost gap, error distribution, per node vs summed over nodes; then one parity plot per case
 (capacities and flows together, coloured by their divergence from the 1:1 line on one shared scale).
@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "workflow" / "scripts"))
 
 from converter.compare import (  # noqa: E402
