@@ -143,6 +143,8 @@ pixi run snakemake --cores 1 -s workflow/Snakefile results/ERS_test_example/comp
   - Invalid v0.7 node names (e.g. `region1-1`) are renamed on load (`legacy.v07_name`), also in CSV headers.
 - **Timeseries are trimmed** to the legacy `subset_time`. v0.7 loads whole tables before subsetting
   (the 2030 model needed about 20 GB untrimmed).
+  Big CSVs: the span is found by bisection (sorted timesteps) and read in chunks for validation, copy and derived
+  CSVs (`timeseries.span_slice` / `read_chunks`); never read a whole CSV into memory.
 - **Resampling averages** (v0.6 `mean`; `resource` summed). v0.7 defaults `resample_method` to `first`, so custom
   parameters declare `mean` and other timeseries params get it in `math/resample.yaml`.
 - **SPORES.**

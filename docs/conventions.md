@@ -217,6 +217,12 @@ Plain renames (base-tech independent):
    every other timeseries parameter without one gets `mean` in `math/resample.yaml` (`source_use_*`/`sink_use_*`
    keep v0.7's `sum`). Without this, a 730 h run used the first hour of each window: charging limits off by -8% to
    +12% made the v0.6 EV fleet infeasible in v0.7 (year case cost +12.7% instead of +1.1%).
+8. **Big files are read by the span, in chunks.** Timesteps are sorted, so the rows of `subset_time` are located by
+   bisection on byte offsets (a few dozen reads); validation, the trimmed copy and derived CSVs read only those bytes,
+   100 000 rows at a time, so memory does not grow with the file. Validation covers the kept rows (the trimmed-away
+   years cannot affect the converted model). Duplicated timesteps make a CSV unusable (warned); unsorted or non-ISO
+   timesteps are read in full instead (`csv_unsorted` warning when unsorted). The model entry file is found by a text
+   scan for a top-level `model:` line before any YAML is parsed.
 
 ## 8. Group constraints
 

@@ -126,6 +126,9 @@ class LegacyModel:
         return self.provenance.get((section, name), self.rel(self.entry))
 
 
+_TOP_LEVEL_MODEL = re.compile(r"^model\s*:", re.MULTILINE)
+
+
 def find_entry_files(model_dir: Path, exclude: list[str] | None = None) -> list[Path]:
     """Find YAML files with a top-level `model:` key (the v0.6 model entry points)."""
     exclude = exclude or []
@@ -134,6 +137,9 @@ def find_entry_files(model_dir: Path, exclude: list[str] | None = None) -> list[
         if any(fnmatch.fnmatch(path.name, pattern) for pattern in exclude):
             continue
         try:
+            # Cheap text check first: only files with a top-level `model:` line are parsed.
+            if not _TOP_LEVEL_MODEL.search(path.read_text(encoding="utf-8", errors="replace")):
+                continue
             yaml = YAML(typ="safe", pure=True)
             with open(path, encoding="utf-8") as f:
                 data = yaml.load(f)

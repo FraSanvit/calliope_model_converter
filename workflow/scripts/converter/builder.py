@@ -1018,7 +1018,9 @@ class ModelBuilder:
                     )
                     continue
                 if src not in headers:
-                    headers[src] = read_header(src) if validate_csv(src, self.diag, self.legacy.rel(src)) else []
+                    headers[src] = (
+                        read_header(src) if validate_csv(src, self.diag, self.legacy.rel(src), self.span) else []
+                    )
                 if not headers[src]:
                     continue
                 columns = [self.legacy.node_renames.get(c, c) for c in headers[src][1:]]
