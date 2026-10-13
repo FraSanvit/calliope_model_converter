@@ -151,6 +151,10 @@ Plain renames (base-tech independent):
 ## 6. Conversion and conversion_plus technologies
 
 1. **Plain conversion** (one input, one output): `energy_eff` → `flow_out_eff`; capacity on the output carrier.
+   **A carrier repeated on the same side** (listed twice in `carrier_out`, or in both `carrier_out` and `carrier_out_2`;
+   the same for inputs) is kept once, at its first occurrence (tier order `out`, `out_2`, `out_3`); the repeat and its
+   carrier ratio are ignored (`duplicate_carrier` warning). The same carrier as input and output is fine (storage,
+   transmission, v2g-like conversion techs) and is left unchanged.
 2. **conversion_plus: only `carrier_ratios` and `energy_eff` are converted**, with the v0.6 semantics
    (Calliope v0.6.9 docs, *Advanced constraints*: CHP, air source heat pump, CCHP):
    - carriers **across tiers** are combined with **AND** (`carrier_out` + `carrier_out_2`: electricity and heat);
@@ -370,7 +374,8 @@ The report groups warnings by code. The ones that usually need a decision:
 |---|---|
 | `missing_lifetime` | **failed check**: techs with investment costs and no `lifetime` (listed with their file); v0.7 cannot annualise their costs and the objective becomes NaN |
 | `undefined_tech` / `unknown_tech` | an override or group refers to a tech the model never defines |
-| `unreferenced_csv`, `bad_csv`, `csv_nan`, `missing_column` | timeseries problems |
+| `unreferenced_csv`, `bad_csv`, `csv_nan`, `csv_unsorted`, `missing_column` | timeseries problems |
+| `duplicate_carrier` | a tech lists the same carrier twice among its inputs or its outputs; the repeat is ignored (section 6) |
 | `override_overlap`, `scenario_merged` | overrides that set the same keys (section 2) |
 | `group_redefined` | a group defined differently in several overrides (section 8) |
 | `objective_weights` (info) | cost classes excluded from the objective (section 5) |

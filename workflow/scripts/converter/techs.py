@@ -422,6 +422,8 @@ class FragmentConverter:
                     self.diag.warn("bad_value", f"Unknown carrier_ratios tier `{tier_key}` on `{info.name}`.", scope)
                     continue
                 for carrier, ratio in (carriers or {}).items():
+                    if str(carrier) in info.duplicate_carriers.get(tier, []):
+                        continue  # a repeated carrier, ignored (warned once as `duplicate_carrier`)
                     if str(carrier) not in ratios[tier]:
                         self.diag.warn(
                             "bad_value",

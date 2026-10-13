@@ -217,3 +217,35 @@ def test_multi_carrier_tier1_link_is_weighted(ctx, monkeypatch):
         "(flow_out[carriers=electricity] + flow_out[carriers=steam] * flow_out_eff[carriers=electricity] "
         "/ flow_out_eff[carriers=steam]) * carrier_out_2_to_carrier_out_1_ratio[carriers=heat] == flow_out[carriers=heat]"
     )
+
+
+def test_repeated_carrier_on_one_side_is_dropped(legacy_copy, tmp_path):
+    """A carrier listed twice among the outputs (one list or several tiers) is warned and kept once, with its ratio."""
+    from converter.convert import convert_model
+    from ruamel.yaml import YAML
+
+    techs = legacy_copy / "model/techs.yaml"
+    text = techs.read_text(encoding="utf-8")
+    old = "            carrier_out: electricity\n            carrier_out_2: heat\n"
+    assert old in text
+    text = text.replace(
+        old, "            carrier_out: [electricity, electricity]\n            carrier_out_2: [heat, electricity]\n", 1
+    )
+    text = text.replace(
+        "            carrier_ratios.carrier_out_2.heat: 1.2\n",
+        "            carrier_ratios.carrier_out_2.heat: 1.2\n            carrier_ratios.carrier_out_2.electricity: 3\n",
+        1,
+    )
+    techs.write_text(text, encoding="utf-8")
+    out = tmp_path / "out"
+    result = convert_model(legacy_copy, out, copy_csvs=False)
+    warned = [m.message for m in result.diagnostics.messages if m.code == "duplicate_carrier"]
+    assert len(warned) == 1
+    assert "`chp`" in warned[0]
+    assert "`electricity` in `carrier_out`" in warned[0]
+    assert "`electricity` in `carrier_out_2`" in warned[0]
+    assert not any("carrier_out_2.electricity" in m.message for m in result.diagnostics.messages)  # no 2nd warning
+    chp = YAML(typ="safe", pure=True).load((out / "techs.yaml").read_text(encoding="utf-8"))["techs"]["chp"]
+    assert chp["carrier_out"] == ["electricity", "heat"]
+    # the same carrier as input and output (storage here, v2g elsewhere) is not a repeat
+    assert not any("battery" in m for m in warned)

@@ -71,6 +71,7 @@ class TechInfo:
     include_storage: bool = False
     base_constraints: dict = field(default_factory=dict)  # resolved from the base model only
     base_costs: dict = field(default_factory=dict)  # resolved from the base model only (incl. tech_groups)
+    duplicate_carriers: dict[str, list[str]] = field(default_factory=dict)  # tier -> repeated carriers dropped
 
     @property
     def base_tech(self) -> str | None:
@@ -199,7 +200,17 @@ class TechContext:
         base_merged = deep_merge(base_merged, own or {})
         info.base_constraints = base_merged.get("constraints", {}) or {}
         info.base_costs = base_merged.get("costs", {}) or {}
-        info.tiers = self._tiers(essentials, abstract)
+        info.tiers, dropped = self._dedupe(self._raw_tiers(essentials, abstract))
+        if dropped:
+            listed = ", ".join(f"`{c}` in `carrier_{t}`" for t, cs in dropped.items() for c in cs)
+            self.diag.warn(
+                "duplicate_carrier",
+                f"`{name}` lists a carrier more than once on the same side ({listed}); the repeat is ignored "
+                "(the first occurrence, and its carrier ratio, is kept).",
+            )
+            info.duplicate_carriers = {
+                t: [c for c in cs if c not in info.tiers.get(t, [])] for t, cs in dropped.items()
+            }
         info.primary_out = self._primary(essentials, info, "out")
         info.primary_in = self._primary(essentials, info, "in")
         default_force = abstract == "demand"
@@ -215,6 +226,31 @@ class TechContext:
 
     @staticmethod
     def _tiers(essentials: dict, abstract: str | None) -> dict[str, list[str]]:
+        """Carriers per tier, a carrier repeated on the same side (in or out tiers) kept once."""
+        return TechContext._dedupe(TechContext._raw_tiers(essentials, abstract))[0]
+
+    @staticmethod
+    def _dedupe(tiers: dict[str, list[str]]) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
+        """(kept, dropped) carriers per tier.
+
+        A carrier repeated within the input tiers, or within the output tiers, keeps its first occurrence (tier order
+        `in`, `in_2`, `in_3`). The same carrier as input and output is fine (storage, v2g).
+        """
+        kept: dict[str, list[str]] = {}
+        dropped: dict[str, list[str]] = {}
+        for side in (IN_TIERS, OUT_TIERS):
+            seen: set[str] = set()
+            for tier in side:
+                for carrier in tiers.get(tier, []):
+                    if carrier in seen:
+                        dropped.setdefault(tier, []).append(carrier)
+                    else:
+                        seen.add(carrier)
+                        kept.setdefault(tier, []).append(carrier)
+        return kept, dropped
+
+    @staticmethod
+    def _raw_tiers(essentials: dict, abstract: str | None) -> dict[str, list[str]]:
         tiers: dict[str, list[str]] = {}
         carrier = as_list(essentials.get("carrier"))
         for tier in IN_TIERS:
