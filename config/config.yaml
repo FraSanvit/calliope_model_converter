@@ -5,6 +5,7 @@ models:
   ERS_test_example_spores: {}  # ERS_test_example + a SPORES override (PV min/max), for the SPORES comparison
   national_scale: {}  # Calliope v0.6.10 example model
   urban_scale: {}  # Calliope v0.6.10 example model
+  ERS_last: {}
   # Add more folders here (e.g. 2030_ERS_eurospores) to convert them too.
 # YAML files matching these patterns are never used as the model entry file.
 exclude_entries: ["*_.yaml"]

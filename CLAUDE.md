@@ -129,8 +129,9 @@ pixi run snakemake --cores 1 -s workflow/Snakefile results/ERS_test_example/comp
   (a literal translation: regions added later in v0.7 are not included automatically).
   Carriers / cost classes are selected with `[key] in carriers|costs` in `where` (no per-group key lookups), and
   the `demand_share_per_timestep_decision` main constraints are one min/max pair whose `where` ORs the groups.
-  `contract_group_families` (default on): per-region copies of a group (one `locs` each, same techs and constraint
-  types, names equal without the number, defined in one scope only) become one group with values indexed on
+  `contract_group_families` (default on): per-region copies of a group (one `locs` each, a different one per copy,
+  same techs and constraint types, defined in one scope only; names do not matter, except that copies sharing a
+  location are merged only if their names are equal without the number) become one group with values indexed on
   `nodes` and constraints over `nodes`. Same rows; `false` keeps one constraint per legacy group. Family ids are
   `<override>_<family>` (override names are unique). Literal slices fail on absent techs; vectorising over a shared
   group dimension explodes memory.

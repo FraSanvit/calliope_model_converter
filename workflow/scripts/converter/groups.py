@@ -421,9 +421,10 @@ class GroupConverter:
     def contract_families(self, scopes: list[GroupData], labels: list[str]) -> None:
         """Merge per-region copies of a legacy group into one group with node-indexed values.
 
-        A family: groups of one scope whose names match once the number is removed (`biofuel_1..4` ->
-        `biofuel`, `1_demand_share_x` -> `demand_share_x`), each with exactly one location, the same techs and the
-        same constraint types/keys, and defined nowhere else (so no override can change one copy alone).
+        A family: groups of one scope with exactly one location each (a different one per copy), the same techs and
+        the same constraint types/keys, and defined nowhere else (so no override can change one copy alone). Names
+        do not matter (`ALB_1_diesel`, `AUT_2_diesel`, `biofuel_ALB`, ...); if two such groups share a location, only
+        copies whose names match once the number is removed (`biofuel_1..4`) are merged.
         Per-node sums over the family's techs are exactly the per-group sums of the copies.
         """
         name_count: dict[str, int] = defaultdict(int)
@@ -431,27 +432,27 @@ class GroupConverter:
             for group in data.groups:
                 name_count[group.name] += 1
         for data, label in zip(scopes, labels, strict=True):
-            families: dict[tuple, list[GroupDefinition]] = defaultdict(list)
+            candidates: dict[tuple, list[GroupDefinition]] = defaultdict(list)
             for group in data.groups:
-                family = _family_name(group.name)
-                if family is None or len(group.nodes) != 1 or name_count[group.name] > 1:
+                if len(group.nodes) != 1 or name_count[group.name] > 1:
                     continue
                 if group.gid != sanitise(group.name):
                     continue  # redefined elsewhere with other members
                 items = tuple(sorted((i.vtype, i.sense, i.key or "") for i in group.items))
                 dspt = tuple(sorted((c, math.isfinite(v)) for c, v in group.dspt.items()))
-                families[(family, tuple(group.techs), items, dspt)].append(group)
-            for (family, *_), copies in families.items():
-                nodes = [g.nodes[0] for g in copies]
-                if len(copies) < 2 or len(set(nodes)) < len(nodes):
+                candidates[(tuple(group.techs), items, dspt)].append(group)
+            for copies in (f for c in candidates.values() for f in _one_per_node(c)):
+                if len(copies) < 2:
                     continue
-                merged = self._merge(_family_id(family, label), copies)
+                merged = self._merge(_family_id(_family_name(copies), label), copies)
                 index = data.groups.index(copies[0])
                 data.groups = [g for g in data.groups if g not in copies]
                 data.groups.insert(index, merged)
+                names = [g.name for g in copies]
+                shown = names if len(names) <= 5 else [*names[:3], "...", names[-1]]
                 self.diag.info(
                     "group_family",
-                    f"Groups {[g.name for g in copies]} (one location each) -> one group `{merged.gid}` "
+                    f"{len(names)} groups {shown} (one location each) -> one group `{merged.gid}` "
                     "with values indexed on nodes.",
                     label,
                 )
@@ -622,10 +623,40 @@ def _dspt_main_constraints(group_wheres: list[str]) -> dict[str, dict]:
     }
 
 
-def _family_name(name: str) -> str | None:
+def _without_number(name: str) -> str | None:
     """`biofuel_1` -> `biofuel`, `1_demand_share_x` -> `demand_share_x`; None if there is no number."""
     family = re.sub(r"^\d+_|_\d+$", "", name)
     return family if family and family != name else None
+
+
+def _one_per_node(copies: list[GroupDefinition]) -> list[list[GroupDefinition]]:
+    """Candidate copies as families with one copy per node.
+
+    All of them if their nodes differ; otherwise (two groups with the same structure at one node) only copies whose
+    names match once the number is removed, as long as their nodes differ.
+    """
+    if len({g.nodes[0] for g in copies}) == len(copies):
+        return [copies]
+    by_name: dict[str, list[GroupDefinition]] = defaultdict(list)
+    for group in copies:
+        name = _without_number(group.name)
+        if name is not None:
+            by_name[name].append(group)
+    return [f for f in by_name.values() if len({g.nodes[0] for g in f}) == len(f)]
+
+
+def _family_name(copies: list[GroupDefinition]) -> str:
+    """Name parts shared by every copy, without numbers: `ALB_1_diesel`, `AUT_2_diesel` -> `diesel`.
+
+    Falls back to the constraint type (`flow_in_min`, `dspt`) if the names share nothing.
+    """
+    names = [sanitise(g.name).split("_") for g in copies]
+    common = set(names[0]).intersection(*names[1:])
+    family = "_".join(t for t in names[0] if t in common and not t.isdigit())
+    if family:
+        return family
+    item = copies[0].items[0] if copies[0].items else None
+    return f"{item.vtype}_{item.sense}" if item else "dspt"
 
 
 def _family_id(family: str, scope: str) -> str:

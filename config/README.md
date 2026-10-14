@@ -12,7 +12,7 @@ We recommend consulting the following before using this module:
 | `exclude_entries` | File-name patterns never used as entry file (default `["*_.yaml"]`, i.e. discarded copies such as `model-2018_.yaml`). |
 | `trim_timeseries` | Keep only the timesteps inside the legacy `subset_time` (default `true`; v0.7 loads whole tables before subsetting). |
 | `copy_csvs` | Copy all legacy CSVs (default `true`; `false` only for quick tests). |
-| `contract_group_families` | Write per-region copies of a legacy group (`biofuel_1..4`: one location each, same techs and constraints) as one group with values indexed on `nodes` (default `true`; `false`: one constraint per legacy group). |
+| `contract_group_families` | Write per-region copies of a legacy group (`biofuel_1..4`, `ALB_1_diesel`/`AUT_2_diesel`: one location each, same techs and constraints) as one group with values indexed on `nodes` (default `true`; `false`: one constraint per legacy group). |
 
 This data module is part of the [Modelblocks](https://www.modelblocks.org/) project.
 Please consult the [Modelblocks documentation](https://modelblocks.readthedocs.io/) for more details.

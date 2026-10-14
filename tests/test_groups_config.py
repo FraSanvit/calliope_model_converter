@@ -178,6 +178,41 @@ def test_group_family_named_after_override():
     assert [g.gid for g in supply.groups + demand.groups] == ["biofuel_maximum_biofuel", "annual_fuel_demand_biofuel"]
 
 
+def test_group_family_names_do_not_matter():
+    """Copies with the node in the middle of the name or none at all (`ALB_1_diesel`, `biofuel_C`) are merged."""
+    conv = _groups()
+    data = conv.convert(
+        {
+            "A_1_diesel": {"techs": ["bio"], "locs": ["A"], "carrier_con_min": {"diesel": -1}},
+            "B_2_diesel": {"techs": ["bio"], "locs": ["B"], "carrier_con_min": {"diesel": -2}},
+            "diesel_C": {"techs": ["bio"], "locs": ["C"], "carrier_con_min": {"diesel": -3}},
+        },
+        "s",
+    )
+    conv.contract_families([data], ["base"])
+    (group,) = data.groups
+    assert (group.gid, group.sources) == ("diesel", ["A_1_diesel", "B_2_diesel", "diesel_C"])
+    assert data.data_definitions()["group_diesel__flow_in_min__diesel"] == {
+        "data": [1.0, 2.0, 3.0],
+        "index": ["A", "B", "C"],
+        "dims": "nodes",
+    }
+
+
+def test_group_family_same_node():
+    """Two groups with the same structure at one node: only copies with matching names (`x_1..`) are merged."""
+    conv = _groups()
+    data = conv.convert(
+        {
+            f"{name}": {"techs": ["bio"], "locs": [node], "carrier_prod_max": {"biofuel": 1}}
+            for name, node in (("cap_1", "A"), ("cap_2", "B"), ("limit_1", "A"), ("other", "C"))
+        },
+        "s",
+    )
+    conv.contract_families([data], ["base"])
+    assert [g.gid for g in data.groups] == ["cap", "limit_1", "other"]
+
+
 def test_spores_objective_classes_must_be_declared_in_v06():
     """v0.6 builds its objective from `objective_options.cost_class` only: undeclared SPORES classes are warned."""
     diag = Diagnostics()

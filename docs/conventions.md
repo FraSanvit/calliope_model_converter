@@ -241,10 +241,12 @@ Plain renames (base-tech independent):
 5. **Carriers and cost classes** are selected with `[key] in carriers` / `[key] in costs` in `where`.
 6. **v0.6 sums are kept unweighted** over timesteps (no `timestep_weights`), and v0.6 `carrier_con` values
    (negative) become positive `flow_in` limits.
-7. **Group families** (option `contract_group_families`, default `true`): per-region copies of a group (names equal
-   once the number is removed, e.g. `biofuel_1..4`; one location each; same techs and constraint types; defined in
-   one place only and nowhere else) become one group with its value indexed on `nodes` and constraints that loop
-   over `nodes`. The rows are identical. `false` keeps one constraint per legacy group. Each merge is listed in the
+7. **Group families** (option `contract_group_families`, default `true`): per-region copies of a group (one location
+   each, a different one per copy; same techs and constraint types; defined in one place only and nowhere else) become
+   one group, whatever their names (`ALB_1_diesel`, `AUT_2_diesel`, `biofuel_ALB`, ...). If two such groups share a
+   location, only copies whose names are equal once the number is removed (`biofuel_1..4`) are merged. The family is
+   named after the name parts all copies share (`diesel`), or its constraint type if there are none. Its value is
+   indexed on `nodes` and its constraints loop over `nodes`. The rows are identical. `false` keeps one constraint per legacy group. Each merge is listed in the
    report (`group_family`). A family defined in an override is named `<override>_<family>`
    (`biofuel_maximum_biofuel`, `annual_fuel_demand_biofuel`), unless its name already starts with the override name
    (`demand_share_passenger_car_transport`). Override names are unique, so families never clash; a family of the
